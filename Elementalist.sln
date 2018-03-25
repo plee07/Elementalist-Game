@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Elementalist", "Elementalist\Elementalist.vcxproj", "{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Debug|x64.ActiveCfg = Debug|x64
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Debug|x64.Build.0 = Debug|x64
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Debug|x86.ActiveCfg = Debug|Win32
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Debug|x86.Build.0 = Debug|Win32
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Release|x64.ActiveCfg = Release|x64
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Release|x64.Build.0 = Release|x64
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Release|x86.ActiveCfg = Release|Win32
+		{B28065DA-6F20-4B9A-BC57-6E4AF8C71D78}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B229F4BF-1800-4D7D-80BB-3CE726CB3932}
+	EndGlobalSection
+EndGlobal
