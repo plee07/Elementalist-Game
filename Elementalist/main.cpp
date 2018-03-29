@@ -10,14 +10,6 @@
 
 using namespace sf;
 
-// delete later and implement my own
-int generateRandom(int max) {
-	int randomNumber = rand();
-	float random = (randomNumber % max) + 1;
-	int myRandom = random;
-	return myRandom;
-}
-
 int main() {
 
 	// Variable Declaration
@@ -40,13 +32,11 @@ int main() {
 	BackgroundMusic.setVolume(15);
 	BackgroundMusic.play();
 
-	
 	// Projectile Vector Array
 	std::vector<Projectile>::const_iterator iter;
 	std::vector<Projectile> projectileArray;
 	Projectile Projectile1;
 	
-
 	// Enemy Vector Array
 	std::vector<Enemy>::const_iterator iter2;
 	std::vector<Enemy> enemyArray;
@@ -59,8 +49,6 @@ int main() {
 		enemyArray.push_back(Enemy1);
 	}
 
-
-
 	// game loop
 	while (Window.isOpen()) {
 		Event event;
@@ -72,7 +60,6 @@ int main() {
 		}
 		Window.clear();
 		Window.draw(Background);
-		
 		
 		// Firing of a projectile
 		if (Keyboard::isKeyPressed(Keyboard::Space)) {
