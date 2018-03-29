@@ -1,4 +1,5 @@
 #include "Projectile.h"
+#include "Player.h"
 
 Projectile::Projectile() {
 	rect.setSize(Vector2f(47, 43));
