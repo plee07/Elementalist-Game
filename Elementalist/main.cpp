@@ -20,6 +20,8 @@ int main() {
 	Music BackgroundMusic;
 	Player MainPlayer;
 	int numberOfEnemies = 10;
+	Clock projectile_clock;
+	Time projectile_cooldown;
 
 	RenderWindow Window(VideoMode(Resolution.x, Resolution.y), "Random RPG Map", Style::Close);
 
@@ -40,17 +42,39 @@ int main() {
 	// Enemy Vector Array
 	std::vector<Enemy>::const_iterator iter2;
 	std::vector<Enemy> enemyArray;
-	Enemy Enemy1;
+	Enemy enemyEarth("Graphics/enemyEarth.png");
+	Enemy enemyWater("Graphics/enemyWater.png");
+	Enemy enemyThunder("Graphics/enemyThunder.png");
+	Enemy enemyFire("Graphics/enemyFire.png");
 
+	// loop to create random enemies
 	for (int i = 0; i < numberOfEnemies; i++) {
-		int enemyXPosition = rand() % 1250;
-		int enemyYPosition = rand() % 700;
-		Enemy1.rect.setPosition(enemyYPosition, enemyXPosition);
-		enemyArray.push_back(Enemy1);
+		int randomEnemy = rand() % 4 + 1;
+		int enemyXPosition = rand() % Window.getSize().x;
+		int enemyYPosition = rand() % Window.getSize().y;
+		switch (randomEnemy) {
+		case 1: // create earth enemy
+			enemyEarth.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyArray.push_back(enemyEarth);
+			break;
+		case 2: // create fire enemy
+			enemyFire.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyArray.push_back(enemyFire);
+			break;
+		case 3: // create water enemy
+			enemyWater.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyArray.push_back(enemyWater);
+			break;
+		case 4: // create thunder enemy
+			enemyThunder.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyArray.push_back(enemyThunder);
+			break;
+		}
 	}
 
 	// game loop
 	while (Window.isOpen()) {
+		projectile_cooldown = projectile_clock.getElapsedTime();
 		Event event;
 		Window.setFramerateLimit(9);
 
@@ -62,7 +86,8 @@ int main() {
 		Window.draw(Background);
 		
 		// Firing of a projectile
-		if (Keyboard::isKeyPressed(Keyboard::Space)) {
+		if (Keyboard::isKeyPressed(Keyboard::Space) && projectile_cooldown.asSeconds() >= 1.5f) {
+			projectile_clock.restart();
 			Projectile1.rect.setPosition
 			(
 				MainPlayer.rect.getPosition().x + MainPlayer.rect.getSize().x / 2 - Projectile1.rect.getSize().x / 2,
@@ -71,6 +96,7 @@ int main() {
 			Projectile1.direction = MainPlayer.direction;
 			projectileArray.push_back(Projectile1);
 		}
+
 
 		// Draw Projectile
 		int counter = 0;

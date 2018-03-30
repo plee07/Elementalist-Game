@@ -1,5 +1,6 @@
 #pragma once
 #include "Entity.h"
+#include <ctime>
 
 class Enemy : public Entity
 {
@@ -10,7 +11,7 @@ public:
 	int movementTime;
 	Texture EnemyTexture;
 
-	Enemy();
+	Enemy(String texture);
 	void update();
 	void enemyMovement();
 };
