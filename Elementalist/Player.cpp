@@ -10,6 +10,8 @@ Player::Player() {
 	spriteAnimation = 0;
 	sprite.setTextureRect(IntRect(0, 0, 32, 48));
 	sprite.scale(Vector2f(2, 2));
+	direction = 2;
+	//sprite.setColor(Color::Yellow);
 }
 void Player::update() {
 	sprite.setPosition(rect.getPosition());

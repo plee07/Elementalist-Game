@@ -18,11 +18,18 @@ int main() {
 	Texture tBackground;
 	Sprite Background;
 	Music BackgroundMusic;
+	SoundBuffer buffer1;
+	SoundBuffer buffer2;
+	Sound ScreamSoundEffect;
+	Sound shoot;
 	Player MainPlayer;
 	int numberOfEnemies = 10;
 	Clock projectile_clock;
 	Time projectile_cooldown;
+	int counter = 0;
+	int counter2 = 0;
 
+	// Create the window
 	RenderWindow Window(VideoMode(Resolution.x, Resolution.y), "Random RPG Map", Style::Close);
 
 	// 8 bit music source http://ericskiff.com/music/
@@ -33,7 +40,16 @@ int main() {
 	Background.setTexture(tBackground);
 	BackgroundMusic.setVolume(15);
 	BackgroundMusic.play();
+	BackgroundMusic.setLoop(true);
 
+	// load sound effects
+	buffer1.loadFromFile("Music/scream.wav");
+	ScreamSoundEffect.setBuffer(buffer1);
+	ScreamSoundEffect.setVolume(25);
+	buffer2.loadFromFile("Music/projectile.wav");
+	shoot.setBuffer(buffer2);
+	shoot.setVolume(100);
+	
 	// Projectile Vector Array
 	std::vector<Projectile>::const_iterator iter;
 	std::vector<Projectile> projectileArray;
@@ -84,9 +100,64 @@ int main() {
 		}
 		Window.clear();
 		Window.draw(Background);
+
+		// projectile collision
+		counter = 0;
+		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) {
+			counter2 = 0;
+			for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
+				
+				// Collision between enemy and projectile
+				if (projectileArray[counter].rect.getGlobalBounds().intersects(enemyArray[counter2].rect.getGlobalBounds())) {
+					std::cout << "Colllision has occured" << std::endl;
+					ScreamSoundEffect.play();
+					//enemyArray[counter2].enemyRetreat(projectileArray[counter].direction);
+					enemyArray[counter2].enemyTerror();
+					projectileArray[counter].removeProjectile = true;
+				}
+				// TODO: return to this one, projectile is not getting deleted upon hitting wall
+				if (
+					projectileArray[counter].rect.getPosition().x == 0 ||
+					projectileArray[counter].rect.getPosition().x == Resolution.x ||
+					projectileArray[counter].rect.getPosition().y == 0 ||
+					projectileArray[counter].rect.getPosition().y == Resolution.y
+					) {
+					projectileArray[counter].removeProjectile = true;
+					std::cout << "Projectile Deleted upon wall hit\n";
+				}
+				counter2++;
+			}
+			counter++;
+		}
 		
-		// Firing of a projectile
+		/*
+		// Delete enemy upon impact
+		counter = 0;
+		for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
+			if (enemyArray[counter].enemyHit == true) {
+				projectileArray[counter].d
+				//enemyArray.erase(iter2);
+				enemyArray[counter].enemyHit == false;
+				break;
+			}
+			counter++;
+		}
+		*/
+		
+		// Delete projectile upon impact
+		// TODO - add sound effect for projectile hit
+		counter = 0;
+		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) {
+			if (projectileArray[counter].removeProjectile == true) {
+				projectileArray.erase(iter);
+				break;
+			}
+			counter++;
+		}
+
+		// Firing of a projectile, limited to 1 per 1.5sec
 		if (Keyboard::isKeyPressed(Keyboard::Space) && projectile_cooldown.asSeconds() >= 1.5f) {
+			shoot.play();
 			projectile_clock.restart();
 			Projectile1.rect.setPosition
 			(
@@ -99,7 +170,7 @@ int main() {
 
 
 		// Draw Projectile
-		int counter = 0;
+		counter = 0;
 		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) { 
 			projectileArray[counter].update();
 			//Window.draw(projectileArray[counter].rect);
@@ -108,23 +179,21 @@ int main() {
 		}
 		
 		// Draw Enemy
-		int enemyCounter = 0;
+		counter2 = 0;
 		for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
-			enemyArray[enemyCounter].update();
-			enemyArray[enemyCounter].enemyMovement();
+			enemyArray[counter2].update();
+			enemyArray[counter2].enemyMovement();
 			//Window.draw(enemyArray[enemyCounter].rect);
-			Window.draw(enemyArray[enemyCounter].sprite);
-			enemyCounter++;
+			Window.draw(enemyArray[counter2].sprite);
+			counter2++;
 		}
 
 		// Output the characters position on console - to be deleted
-		std::cout << "(Player: " << MainPlayer.rect.getPosition().x << "," << MainPlayer.rect.getPosition().y << ")" << std::endl;
+		std::cout << "(Player: " << MainPlayer.rect.getPosition().x << "," << MainPlayer.rect.getPosition().y << ")" << MainPlayer.direction << std::endl;
 
 		Window.draw(MainPlayer.sprite);
 		MainPlayer.update();
-
 		MainPlayer.playerMovement();
-
 		Window.display();
 	}
 }

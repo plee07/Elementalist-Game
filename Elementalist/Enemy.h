@@ -9,10 +9,14 @@ public:
 	int spriteAnimation;
 	int direction; // 1 - up, 2 - down, 3 - left, 4 - right
 	int movementTime;
+	bool alive;
+	bool enemyHit;
 	Texture EnemyTexture;
 
 	Enemy(String texture);
 	void update();
 	void enemyMovement();
+	void enemyRetreat(int projectileDirection);
+	void enemyTerror();
 };
 
