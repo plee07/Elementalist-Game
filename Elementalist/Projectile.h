@@ -8,7 +8,7 @@ public:
 	float movementSpeed;
 	int direction; // 1 - up, 2 - down, 3 - left, 4 - right
 	bool removeProjectile;
-	Texture PushProjectile;
+	Texture ProjectileTexture;
 
 	Projectile();
 	void update();

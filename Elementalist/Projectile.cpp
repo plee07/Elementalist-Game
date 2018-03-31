@@ -4,12 +4,12 @@
 Projectile::Projectile() {
 	rect.setSize(Vector2f(48, 48));
 	rect.setPosition(0, 0);
-	movementSpeed = 20;
-	if (!PushProjectile.loadFromFile("Graphics/ghost.png"))
+	movementSpeed = 30;
+	if (!ProjectileTexture.loadFromFile("Graphics/ghost.png"))
 		std::cout << "Projectile Load Error";
-	sprite.setTexture(PushProjectile);
+	sprite.setTexture(ProjectileTexture);
 	sprite.setTextureRect(IntRect(0, 0, 48, 48));
-	sprite.scale(Vector2f(2, 2));
+	//sprite.scale(Vector2f(2, 2));
 	removeProjectile = false;
 }
 

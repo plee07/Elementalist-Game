@@ -2,6 +2,7 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <vector>
+#include <ctime>
 
 #include "Player.h"
 #include "Entity.h"
@@ -14,55 +15,61 @@ int main() {
 
 	// Variable Declaration
 	const Vector2f Resolution(1280, 720);
-	Texture PushSpellTexture;
-	Texture tBackground;
+	Texture BackgroundTexture;
+	Texture Icon;
+	Sprite ElementIcon;
 	Sprite Background;
 	Music BackgroundMusic;
 	SoundBuffer buffer1;
 	SoundBuffer buffer2;
-	Sound ScreamSoundEffect;
+	Sound scream;
 	Sound shoot;
 	Player MainPlayer;
-	int numberOfEnemies = 10;
 	Clock projectile_clock;
 	Time projectile_cooldown;
+	Clock element_clock;
+	Time element_timer;
+	srand(time(NULL));
+	const int numberOfEnemies = 10;
 	int counter = 0;
-	int counter2 = 0;
 
-	// Create the window
-	RenderWindow Window(VideoMode(Resolution.x, Resolution.y), "Random RPG Map", Style::Close);
-
-	// 8 bit music source http://ericskiff.com/music/
-	BackgroundMusic.openFromFile("Music/Root.ogg");
-
-	// load the background image and music
-	tBackground.loadFromFile("Graphics/background.png");
-	Background.setTexture(tBackground);
-	BackgroundMusic.setVolume(15);
-	BackgroundMusic.play();
-	BackgroundMusic.setLoop(true);
-
-	// load sound effects
-	buffer1.loadFromFile("Music/scream.wav");
-	ScreamSoundEffect.setBuffer(buffer1);
-	ScreamSoundEffect.setVolume(25);
-	buffer2.loadFromFile("Music/projectile.wav");
-	shoot.setBuffer(buffer2);
-	shoot.setVolume(100);
-	
-	// Projectile Vector Array
+	// Projectile Vector Array declaration
 	std::vector<Projectile>::const_iterator iter;
 	std::vector<Projectile> projectileArray;
 	Projectile Projectile1;
-	
-	// Enemy Vector Array
+
+	// Enemy Vector Array declaration
 	std::vector<Enemy>::const_iterator iter2;
 	std::vector<Enemy> enemyArray;
+
+	// declare and load enemy sprite
 	Enemy enemyEarth("Graphics/enemyEarth.png");
 	Enemy enemyWater("Graphics/enemyWater.png");
 	Enemy enemyThunder("Graphics/enemyThunder.png");
 	Enemy enemyFire("Graphics/enemyFire.png");
 
+	// Create the window
+	RenderWindow Window(VideoMode(Resolution.x, Resolution.y), "Elementalist", Style::Close);
+
+	// load the background image, music, and element icon
+	BackgroundTexture.loadFromFile("Graphics/background.png");
+	Background.setTexture(BackgroundTexture);
+	BackgroundMusic.openFromFile("Music/Root.ogg");
+	BackgroundMusic.setVolume(15);
+	BackgroundMusic.play();
+	BackgroundMusic.setLoop(true);
+	Icon.loadFromFile("Graphics/elemental_icon.png");
+	ElementIcon.setTexture(Icon);
+	ElementIcon.scale(Vector2f(2, 2));
+
+	// load sound effects
+	buffer1.loadFromFile("Music/scream.wav");
+	scream.setBuffer(buffer1);
+	scream.setVolume(50);
+	buffer2.loadFromFile("Music/projectile.wav");
+	shoot.setBuffer(buffer2);
+	shoot.setVolume(100);
+	
 	// loop to create random enemies
 	for (int i = 0; i < numberOfEnemies; i++) {
 		int randomEnemy = rand() % 4 + 1;
@@ -70,19 +77,19 @@ int main() {
 		int enemyYPosition = rand() % Window.getSize().y;
 		switch (randomEnemy) {
 		case 1: // create earth enemy
-			enemyEarth.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyEarth.rect.setPosition(enemyXPosition, enemyYPosition);
 			enemyArray.push_back(enemyEarth);
 			break;
 		case 2: // create fire enemy
-			enemyFire.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyFire.rect.setPosition(enemyXPosition, enemyYPosition);
 			enemyArray.push_back(enemyFire);
 			break;
 		case 3: // create water enemy
-			enemyWater.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyWater.rect.setPosition(enemyXPosition, enemyYPosition);
 			enemyArray.push_back(enemyWater);
 			break;
 		case 4: // create thunder enemy
-			enemyThunder.rect.setPosition(enemyYPosition, enemyXPosition);
+			enemyThunder.rect.setPosition(enemyXPosition, enemyYPosition);
 			enemyArray.push_back(enemyThunder);
 			break;
 		}
@@ -91,6 +98,7 @@ int main() {
 	// game loop
 	while (Window.isOpen()) {
 		projectile_cooldown = projectile_clock.getElapsedTime();
+		element_timer = element_clock.getElapsedTime();
 		Event event;
 		Window.setFramerateLimit(9);
 
@@ -101,58 +109,23 @@ int main() {
 		Window.clear();
 		Window.draw(Background);
 
-		// projectile collision
-		counter = 0;
-		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) {
-			counter2 = 0;
-			for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
-				
-				// Collision between enemy and projectile
-				if (projectileArray[counter].rect.getGlobalBounds().intersects(enemyArray[counter2].rect.getGlobalBounds())) {
-					std::cout << "Colllision has occured" << std::endl;
-					ScreamSoundEffect.play();
-					//enemyArray[counter2].enemyRetreat(projectileArray[counter].direction);
-					enemyArray[counter2].enemyTerror();
-					projectileArray[counter].removeProjectile = true;
-				}
-				// TODO: return to this one, projectile is not getting deleted upon hitting wall
-				if (
-					projectileArray[counter].rect.getPosition().x == 0 ||
-					projectileArray[counter].rect.getPosition().x == Resolution.x ||
-					projectileArray[counter].rect.getPosition().y == 0 ||
-					projectileArray[counter].rect.getPosition().y == Resolution.y
-					) {
-					projectileArray[counter].removeProjectile = true;
-					std::cout << "Projectile Deleted upon wall hit\n";
-				}
-				counter2++;
-			}
-			counter++;
-		}
-		
-		/*
-		// Delete enemy upon impact
-		counter = 0;
-		for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
-			if (enemyArray[counter].enemyHit == true) {
-				projectileArray[counter].d
-				//enemyArray.erase(iter2);
-				enemyArray[counter].enemyHit == false;
-				break;
-			}
-			counter++;
-		}
-		*/
-		
-		// Delete projectile upon impact
-		// TODO - add sound effect for projectile hit
-		counter = 0;
-		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) {
-			if (projectileArray[counter].removeProjectile == true) {
-				projectileArray.erase(iter);
-				break;
-			}
-			counter++;
+		//TODO make this into a Player class method
+		// display player's elemental status
+		if (MainPlayer.playerStatus == 1) // Earth
+			ElementIcon.setTextureRect(IntRect(0,32*4,32,32));
+		if (MainPlayer.playerStatus == 2) // Fire
+			ElementIcon.setTextureRect(IntRect(0, 0, 32, 32));
+		if (MainPlayer.playerStatus == 3) // Water
+			ElementIcon.setTextureRect(IntRect(32*9, 0, 32, 32));
+		if (MainPlayer.playerStatus == 4) // Thunder
+			ElementIcon.setTextureRect(IntRect(32*6, 0, 32, 32));
+		Window.draw(ElementIcon);
+
+		// Change player's status every 10 second
+		if (element_timer.asSeconds() >= 10) {
+			MainPlayer.playerStatus = (rand() % 4) + 1;
+			element_clock.restart();
+			Window.draw(ElementIcon);
 		}
 
 		// Firing of a projectile, limited to 1 per 1.5sec
@@ -168,7 +141,6 @@ int main() {
 			projectileArray.push_back(Projectile1);
 		}
 
-
 		// Draw Projectile
 		counter = 0;
 		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) { 
@@ -179,17 +151,57 @@ int main() {
 		}
 		
 		// Draw Enemy
-		counter2 = 0;
+		counter = 0;
 		for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
-			enemyArray[counter2].update();
-			enemyArray[counter2].enemyMovement();
-			//Window.draw(enemyArray[enemyCounter].rect);
-			Window.draw(enemyArray[counter2].sprite);
-			counter2++;
+			enemyArray[counter].update();
+			enemyArray[counter].enemyMovement();
+			//Window.draw(enemyArray[counter].rect);
+			Window.draw(enemyArray[counter].sprite);
+			counter++;
+		}
+
+		// projectile to enemy collision
+		counter = 0;
+		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) {
+			int counter2 = 0;
+			for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
+
+				// Collision between enemy and projectile
+				if (projectileArray[counter].rect.getGlobalBounds().intersects(enemyArray[counter2].rect.getGlobalBounds())) {
+					std::cout << "Colllision has occured" << std::endl;
+					scream.play();
+					//enemyArray[counter2].enemyRetreat(projectileArray[counter].direction); // use this if you want projectile to cause enemy to reverse direction
+					enemyArray[counter2].enemyTerror(); // use this if you want to stun the enemy
+					projectileArray[counter].removeProjectile = true;
+				}
+				// TODO: return to this one, projectile is not getting deleted upon hitting wall
+				if (
+					projectileArray[counter].rect.getPosition().x == 0 ||
+					projectileArray[counter].rect.getPosition().x == Resolution.x ||
+					projectileArray[counter].rect.getPosition().y == 0 ||
+					projectileArray[counter].rect.getPosition().y == Resolution.y
+					) {
+					projectileArray[counter].removeProjectile = true;
+					std::cout << "Wall hit!\n";
+				}
+				counter2++;
+			}
+			counter++;
+		}
+
+		// Delete projectile upon impact
+		counter = 0;
+		for (iter = projectileArray.begin(); iter != projectileArray.end(); iter++) {
+			if (projectileArray[counter].removeProjectile == true) {
+				projectileArray.erase(iter);
+				break;
+			}
+			counter++;
 		}
 
 		// Output the characters position on console - to be deleted
-		std::cout << "(Player: " << MainPlayer.rect.getPosition().x << "," << MainPlayer.rect.getPosition().y << ")" << MainPlayer.direction << std::endl;
+		std::cout << "(Player: " << MainPlayer.rect.getPosition().x << "," << MainPlayer.rect.getPosition().y << ")" <<
+			"Direction: " << MainPlayer.direction << " Status : " << MainPlayer.playerStatus << std::endl;
 
 		Window.draw(MainPlayer.sprite);
 		MainPlayer.update();

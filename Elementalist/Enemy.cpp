@@ -1,6 +1,5 @@
 #include "Enemy.h"
 
-
 Enemy::Enemy(String texture) {
 	EnemyTexture.loadFromFile(texture);
 	sprite.setTexture(EnemyTexture);
@@ -11,16 +10,17 @@ Enemy::Enemy(String texture) {
 	movementSpeed = 20;
 	spriteAnimation = 0;
 	sprite.setTextureRect(IntRect(0,64*2, 64, 64));
-	sprite.scale(Vector2f(2, 2));
+	//sprite.scale(Vector2f(2, 2));
 	movementTime = 0;
 	srand(time(NULL));
 }
-
 
 void Enemy::update() {
 	sprite.setPosition(rect.getPosition());
 }
 
+// TODO - based on direction, need to update the rectangle size, its very wonky with movement
+// TODO - instead of using a for loop, update to use the Clock and Time class
 void Enemy::enemyMovement() {
 	movementTime++;
 	if (movementTime >= 15) {
@@ -39,7 +39,7 @@ void Enemy::enemyMovement() {
 	}
 	else if (direction == 2) { // DOWN
 		sprite.setTextureRect(IntRect(spriteAnimation * 64, 64 * 10, 64, 64));
-		if (rect.getPosition().y >= 720 - 128) {
+		if (rect.getPosition().y >= 720 - 60) {
 			rect.move(0, 0);
 			direction = 1;
 		}
@@ -57,7 +57,7 @@ void Enemy::enemyMovement() {
 	}
 	else if (direction == 4) { // RIGHT
 		sprite.setTextureRect(IntRect(spriteAnimation * 64, 64*11, 64, 64));
-		if (rect.getPosition().x >= 1280 - 128) {
+		if (rect.getPosition().x >= 1280 - 59) {
 			rect.move(0, 0);
 			direction = 3;
 		}
@@ -74,7 +74,7 @@ void Enemy::enemyMovement() {
 		spriteAnimation = 0;
 }
 
-// Note: change the direction to the opposite direction if you want a terror effect
+// Reverses the direction of the enemy
 // I decided to use terror/stun effect instead
 void Enemy::enemyRetreat(int projectileDirection) {
 	if (projectileDirection == 1) {
@@ -93,12 +93,10 @@ void Enemy::enemyRetreat(int projectileDirection) {
 	}
 }
 
+// enemy temporarily unable to move
 void Enemy::enemyTerror() {
 	direction = 0;
 	movementTime = 0;
-	for (int terrorAnimation = 0; terrorAnimation <= 7; terrorAnimation++) {
-		sprite.setTextureRect(IntRect(64 * 6, 64 * terrorAnimation, 64, 64));
-	}
-	sprite.setTextureRect(IntRect(64 * 5, 64 * 20, 64, 64));
+	sprite.setTextureRect(IntRect(64 * 5, 64 * 2, 64, 64));
 
 }
