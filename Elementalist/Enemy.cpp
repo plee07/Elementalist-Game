@@ -3,6 +3,7 @@
 Enemy::Enemy(String texture, int status, String elementSound) {
 	EnemyTexture.loadFromFile(texture);
 	sprite.setTexture(EnemyTexture);
+	deadSprite.setTexture(EnemyTexture);
 	rect.setSize(Vector2f(64, 64));
 	buffer.loadFromFile(elementSound);
 	sound.setBuffer(buffer);
@@ -10,16 +11,16 @@ Enemy::Enemy(String texture, int status, String elementSound) {
 	enemyStatus = status;
 	movementSpeed = 10;
 	spriteAnimation = 0;
-	removeEnemy = false;
+	enemyDead = false;
 	sprite.setTextureRect(IntRect(0,64*2, 64, 64));
-	//sprite.scale(Vector2f(2, 2));
+	deadSprite.setTextureRect(IntRect(64 * 5, 64 * 20, 64, 64));
 	movementTime = 0;
-	direction = (rand() % 4) + 1;
 	srand(time(NULL));
 }
 
 void Enemy::update() {
 	sprite.setPosition(rect.getPosition());
+	deadSprite.setPosition(rect.getPosition());
 }
 
 // TODO -  need to update the rectangle size so that it matches the sprite, it's very wonky when movement/direction is involved

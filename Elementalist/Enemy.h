@@ -10,7 +10,8 @@ public:
 	int direction; // 1 - up, 2 - down, 3 - left, 4 - right
 	int movementTime;
 	int enemyStatus;
-	bool removeEnemy;
+	bool enemyDead;
+	Sprite deadSprite;
 	SoundBuffer buffer;
 	Sound sound;
 	Texture EnemyTexture;

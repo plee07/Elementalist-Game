@@ -9,7 +9,6 @@ Projectile::Projectile() {
 		std::cout << "Projectile Load Error";
 	sprite.setTexture(ProjectileTexture);
 	sprite.setTextureRect(IntRect(0, 0, 48, 48));
-	//sprite.scale(Vector2f(2, 2));
 	removeProjectile = false;
 }
 
@@ -30,6 +29,5 @@ void Projectile::update() {
 	if (direction == 4) {
 		sprite.setTextureRect(IntRect(0, 48 * 2, 48, 48));
 		rect.move(movementSpeed, 0); // right
-
 	}
 }

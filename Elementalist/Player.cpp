@@ -8,7 +8,6 @@ Player::Player() {
 	movementSpeed = 15;
 	spriteAnimation = 0;
 	sprite.setTextureRect(IntRect(0, 64 * 2, 64, 64));
-	//sprite.scale(Vector2f(2, 2));
 	direction = 2;
 	srand(time(NULL));
 	playerStatus = (rand() % 4) + 1;
@@ -31,7 +30,7 @@ void Player::playerMovement() {
 	else if (Keyboard::isKeyPressed(Keyboard::S)) {
 		direction = 2;
 		sprite.setTextureRect(IntRect(spriteAnimation * 64, 64 * 10, 64, 64));
-		if (rect.getPosition().y >= 720-60)
+		if (rect.getPosition().y >= 720 -60)
 			rect.move(0, 0);
 		else
 			rect.move(0, movementSpeed);
@@ -47,7 +46,7 @@ void Player::playerMovement() {
 	else if (Keyboard::isKeyPressed(Keyboard::D)) {
 		direction = 4;
 		sprite.setTextureRect(IntRect(spriteAnimation * 64, 64 * 11, 64, 64));
-		if (rect.getPosition().x >= 1280-50)
+		if (rect.getPosition().x >= 1280 -50)
 			rect.move(0, 0);
 		else
 			rect.move(movementSpeed, 0);
@@ -70,4 +69,5 @@ void Player::playerTerror() {
 void Player::playerDeath() {
 	sprite.setTextureRect(IntRect(64 * 5, 64 * 20, 64, 64));
 	playerDead = true;
+
 }

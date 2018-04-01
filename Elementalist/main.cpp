@@ -11,16 +11,15 @@
 
 using namespace sf;
 
-
-
 int main() {
-
 	// Variable Declaration
-	const Vector2f Resolution(1280, 720);
+	Vector2f Resolution(1280,720);
 	Texture BackgroundTexture;
 	Texture Icon;
 	Sprite ElementIcon;
 	Sprite Background;
+	Text gameOverText;
+	Text victoryText;
 	Music BackgroundMusic;
 	SoundBuffer buffer1;
 	SoundBuffer buffer2;
@@ -34,9 +33,30 @@ int main() {
 	Clock playerToEnemyCollision_clock;
 	Time playerToEnemyCollision_cooldown;
 	srand(time(NULL));
+	bool gameStart = false;
 	const int numberOfEnemies = 10;
 	int counter = 0;
 	int PlayerStunCountdown = 6;
+	int enemyDeathCount = 0;
+
+	// Load the font
+	Font font;
+	if (!font.loadFromFile("Font/8blimro.ttf"))
+		std::cout << "Did not load font\n";
+
+	// Game Over
+	gameOverText.setFont(font);
+	gameOverText.setCharacterSize(125);
+	gameOverText.setPosition(100, 100);
+	gameOverText.setString("Game Over!");
+	gameOverText.setFillColor(Color::White);
+
+	// Victory
+	victoryText.setFont(font);
+	victoryText.setCharacterSize(125);
+	victoryText.setPosition(100, 100);
+	victoryText.setString("YOU WIN!");
+	victoryText.setFillColor(Color::White);
 
 	// Projectile Vector Array declaration
 	std::vector<Projectile>::const_iterator iter;
@@ -53,7 +73,6 @@ int main() {
 	Enemy enemyWater("Graphics/enemyWater.png", 3, "Music/chill.wav");
 	Enemy enemyThunder("Graphics/enemyThunder.png", 4, "Music/thunder.wav");
 	
-
 	// Create the window
 	RenderWindow Window(VideoMode(Resolution.x, Resolution.y), "Elementalist", Style::Close);
 
@@ -113,9 +132,11 @@ int main() {
 
 		Event event;
 		while (Window.pollEvent(event)) {
-			if (event.type == Event::Closed)
+			//if (event.type == Event::Closed)
+			if(Keyboard::isKeyPressed(Keyboard::Escape))
 				Window.close();
 		}
+
 		Window.clear();
 		Window.draw(Background);
 
@@ -215,19 +236,19 @@ int main() {
 					playerToEnemyCollision_clock.restart();
 					scream.play();
 					if (MainPlayer.playerStatus == 1 && enemyArray[counter].enemyStatus == 4) { // Player Earth beats  Enemy Thunder
-						enemyArray[counter].removeEnemy = true;
+						enemyArray[counter].enemyDead = true;
 						enemyEarth.sound.play();
 					}
 					else if (MainPlayer.playerStatus == 4 && enemyArray[counter].enemyStatus == 3) { // Player Thunder beats Enemy Water
-						enemyArray[counter].removeEnemy = true;
+						enemyArray[counter].enemyDead = true;
 						enemyThunder.sound.play();
 					}
 					else if (MainPlayer.playerStatus == 3 && enemyArray[counter].enemyStatus == 2) { // Player Water beats Enemy Fire
-						enemyArray[counter].removeEnemy = true;
+						enemyArray[counter].enemyDead = true;
 						enemyWater.sound.play();
 					}
 					else if (MainPlayer.playerStatus == 2 && enemyArray[counter].enemyStatus == 1) { // Player Fire beats  Enemy Earth
-						enemyArray[counter].removeEnemy = true;
+						enemyArray[counter].enemyDead = true;
 						enemyFire.sound.play();
 					}
 					else if (MainPlayer.playerStatus == 4 && enemyArray[counter].enemyStatus == 1) { // Enemy Earth beats Player Thunder
@@ -256,11 +277,13 @@ int main() {
 			counter++;
 		}
 
-		// Delete enemy if hit by weakness
+		// Delete enemy if hit with their weakness
 		counter = 0;
 		for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++){
-			if (enemyArray[counter].removeEnemy == true) {
+			if (enemyArray[counter].enemyDead == true) {
 				enemyArray.erase(iter2);
+				enemyDeathCount++;
+				std::cout << enemyDeathCount << std::endl;
 				break;
 			}
 			counter++;
@@ -290,6 +313,24 @@ int main() {
 		if(!MainPlayer.playerPause && !MainPlayer.playerDead) {
 			MainPlayer.playerMovement();
 		}
+
+		// Game over status
+		if (MainPlayer.playerDead) {
+			counter = 0;
+			for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
+				enemyArray.erase(iter2);
+				break;
+			}
+			Window.draw(gameOverText);
+			BackgroundMusic.stop();
+		}
+
+		// Victory status
+		if (enemyDeathCount >= numberOfEnemies) {
+			Window.draw(victoryText);
+			BackgroundMusic.stop();
+		}
+
 		Window.display();
 	}
 }
