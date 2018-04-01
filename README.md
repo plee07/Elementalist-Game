@@ -17,4 +17,4 @@ If you approach the vicinity of an Elementalist strong against your elemental st
 
 If you approach the vicinity of any other Elementalist – you experience a light scare but nothing you can’t handle.
 
-You’re goal is to destroy 10 living beings!
+Your goal is to destroy 10 living beings!
