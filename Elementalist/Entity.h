@@ -11,6 +11,8 @@ public:
 	RectangleShape rect;
 	Sprite sprite;
 	Text text;
+	Clock clock;
+	Time timer;
 
 	Entity();
 

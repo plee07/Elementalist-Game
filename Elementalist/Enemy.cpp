@@ -1,17 +1,20 @@
 #include "Enemy.h"
 
-Enemy::Enemy(String texture) {
+Enemy::Enemy(String texture, int status, String elementSound) {
 	EnemyTexture.loadFromFile(texture);
 	sprite.setTexture(EnemyTexture);
 	rect.setSize(Vector2f(64, 64));
-	//rect.setPosition(100, 100);
-	alive = true;
-	enemyHit = false;
-	movementSpeed = 20;
+	buffer.loadFromFile(elementSound);
+	sound.setBuffer(buffer);
+	sound.setVolume(30);
+	enemyStatus = status;
+	movementSpeed = 10;
 	spriteAnimation = 0;
+	removeEnemy = false;
 	sprite.setTextureRect(IntRect(0,64*2, 64, 64));
 	//sprite.scale(Vector2f(2, 2));
 	movementTime = 0;
+	direction = (rand() % 4) + 1;
 	srand(time(NULL));
 }
 
@@ -19,15 +22,13 @@ void Enemy::update() {
 	sprite.setPosition(rect.getPosition());
 }
 
-// TODO - based on direction, need to update the rectangle size, its very wonky with movement
-// TODO - instead of using a for loop, update to use the Clock and Time class
+// TODO -  need to update the rectangle size so that it matches the sprite, it's very wonky when movement/direction is involved
 void Enemy::enemyMovement() {
 	movementTime++;
 	if (movementTime >= 15) {
 		movementTime = 0;
-		direction = rand() % 4 + 1;
+		direction = (rand() % 4) + 1;
 	}
-
 	if (direction == 1) { // UP
 		sprite.setTextureRect(IntRect(spriteAnimation * 64, 64*8, 64, 64));
 		if (rect.getPosition().y <= 0) {
@@ -64,9 +65,6 @@ void Enemy::enemyMovement() {
 		else
 			rect.move(movementSpeed, 0);
 	}
-	else {
-		// do nothing
-	}
 
 	// to loop through the sprite animation left to right
 	spriteAnimation++;
@@ -74,29 +72,9 @@ void Enemy::enemyMovement() {
 		spriteAnimation = 0;
 }
 
-// Reverses the direction of the enemy
-// I decided to use terror/stun effect instead
-void Enemy::enemyRetreat(int projectileDirection) {
-	if (projectileDirection == 1) {
-		direction = 2;
-		movementTime = 0;
-	}
-	if (projectileDirection == 2) {
-		direction = 1;
-		movementTime = 0;
-	}	if (projectileDirection == 3) {
-		direction = 4;
-		movementTime = 0;
-	}	if (projectileDirection == 4) {
-		direction = 3;
-		movementTime = 0;
-	}
-}
-
 // enemy temporarily unable to move
 void Enemy::enemyTerror() {
+	sprite.setTextureRect(IntRect(64 * 5, 64 * 2, 64, 64));
 	direction = 0;
 	movementTime = 0;
-	sprite.setTextureRect(IntRect(64 * 5, 64 * 2, 64, 64));
-
 }

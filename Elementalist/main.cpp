@@ -11,6 +11,8 @@
 
 using namespace sf;
 
+
+
 int main() {
 
 	// Variable Declaration
@@ -29,9 +31,12 @@ int main() {
 	Time projectile_cooldown;
 	Clock element_clock;
 	Time element_timer;
+	Clock playerToEnemyCollision_clock;
+	Time playerToEnemyCollision_cooldown;
 	srand(time(NULL));
 	const int numberOfEnemies = 10;
 	int counter = 0;
+	int PlayerStunCountdown = 6;
 
 	// Projectile Vector Array declaration
 	std::vector<Projectile>::const_iterator iter;
@@ -43,10 +48,11 @@ int main() {
 	std::vector<Enemy> enemyArray;
 
 	// declare and load enemy sprite
-	Enemy enemyEarth("Graphics/enemyEarth.png");
-	Enemy enemyWater("Graphics/enemyWater.png");
-	Enemy enemyThunder("Graphics/enemyThunder.png");
-	Enemy enemyFire("Graphics/enemyFire.png");
+	Enemy enemyEarth("Graphics/enemyEarth.png", 1, "Music/earth.wav");
+	Enemy enemyFire("Graphics/enemyFire.png", 2, "Music/fire.wav");
+	Enemy enemyWater("Graphics/enemyWater.png", 3, "Music/chill.wav");
+	Enemy enemyThunder("Graphics/enemyThunder.png", 4, "Music/thunder.wav");
+	
 
 	// Create the window
 	RenderWindow Window(VideoMode(Resolution.x, Resolution.y), "Elementalist", Style::Close);
@@ -73,7 +79,7 @@ int main() {
 	// loop to create random enemies
 	for (int i = 0; i < numberOfEnemies; i++) {
 		int randomEnemy = rand() % 4 + 1;
-		int enemyXPosition = rand() % Window.getSize().x;
+		int enemyXPosition = rand() % (Window.getSize().x - 200 );
 		int enemyYPosition = rand() % Window.getSize().y;
 		switch (randomEnemy) {
 		case 1: // create earth enemy
@@ -94,14 +100,18 @@ int main() {
 			break;
 		}
 	}
-
+	
 	// game loop
 	while (Window.isOpen()) {
+
+		// Start various timer
 		projectile_cooldown = projectile_clock.getElapsedTime();
 		element_timer = element_clock.getElapsedTime();
-		Event event;
+		playerToEnemyCollision_cooldown = playerToEnemyCollision_clock.getElapsedTime();
+		
 		Window.setFramerateLimit(9);
 
+		Event event;
 		while (Window.pollEvent(event)) {
 			if (event.type == Event::Closed)
 				Window.close();
@@ -168,21 +178,19 @@ int main() {
 
 				// Collision between enemy and projectile
 				if (projectileArray[counter].rect.getGlobalBounds().intersects(enemyArray[counter2].rect.getGlobalBounds())) {
-					std::cout << "Colllision has occured" << std::endl;
+					//std::cout << "Enemy Colllision" << std::endl;
 					scream.play();
-					//enemyArray[counter2].enemyRetreat(projectileArray[counter].direction); // use this if you want projectile to cause enemy to reverse direction
-					enemyArray[counter2].enemyTerror(); // use this if you want to stun the enemy
+					enemyArray[counter2].enemyTerror();
 					projectileArray[counter].removeProjectile = true;
 				}
-				// TODO: return to this one, projectile is not getting deleted upon hitting wall
+				// wall collision
 				if (
-					projectileArray[counter].rect.getPosition().x == 0 ||
-					projectileArray[counter].rect.getPosition().x == Resolution.x ||
-					projectileArray[counter].rect.getPosition().y == 0 ||
-					projectileArray[counter].rect.getPosition().y == Resolution.y
+					projectileArray[counter].rect.getPosition().x <= 0 ||
+					projectileArray[counter].rect.getPosition().x >= Resolution.x ||
+					projectileArray[counter].rect.getPosition().y <= 0 ||
+					projectileArray[counter].rect.getPosition().y >= Resolution.y
 					) {
 					projectileArray[counter].removeProjectile = true;
-					std::cout << "Wall hit!\n";
 				}
 				counter2++;
 			}
@@ -199,13 +207,89 @@ int main() {
 			counter++;
 		}
 
+		// Player to enemy collision
+		counter = 0;
+		for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++) {
+			if (MainPlayer.rect.getGlobalBounds().intersects(enemyArray[counter].rect.getGlobalBounds())) {
+				if (playerToEnemyCollision_cooldown.asSeconds() >= 2) {
+					playerToEnemyCollision_clock.restart();
+					scream.play();
+					if (MainPlayer.playerStatus == 1 && enemyArray[counter].enemyStatus == 4) { // Player Earth beats  Enemy Thunder
+						enemyArray[counter].removeEnemy = true;
+						enemyEarth.sound.play();
+					}
+					else if (MainPlayer.playerStatus == 4 && enemyArray[counter].enemyStatus == 3) { // Player Thunder beats Enemy Water
+						enemyArray[counter].removeEnemy = true;
+						enemyThunder.sound.play();
+					}
+					else if (MainPlayer.playerStatus == 3 && enemyArray[counter].enemyStatus == 2) { // Player Water beats Enemy Fire
+						enemyArray[counter].removeEnemy = true;
+						enemyWater.sound.play();
+					}
+					else if (MainPlayer.playerStatus == 2 && enemyArray[counter].enemyStatus == 1) { // Player Fire beats  Enemy Earth
+						enemyArray[counter].removeEnemy = true;
+						enemyFire.sound.play();
+					}
+					else if (MainPlayer.playerStatus == 4 && enemyArray[counter].enemyStatus == 1) { // Enemy Earth beats Player Thunder
+						MainPlayer.playerDeath();
+						enemyEarth.sound.play();
+					}
+					else if (MainPlayer.playerStatus == 3 && enemyArray[counter].enemyStatus == 4) { // Enemy Thunder beats Player Water
+						MainPlayer.playerDeath();
+						enemyThunder.sound.play();
+					}
+					else if (MainPlayer.playerStatus == 2 && enemyArray[counter].enemyStatus == 3) { // Enemy Water beats Player Fire
+						MainPlayer.playerDeath();
+						enemyWater.sound.play();
+					}
+					else if (MainPlayer.playerStatus == 1 && enemyArray[counter].enemyStatus == 2) { // Enemy Fire beats Player Earth
+						MainPlayer.playerDeath();
+						enemyFire.sound.play();
+					}
+
+					else { // No weakness, scare player
+						MainPlayer.playerTerror();
+						enemyArray[counter].enemyTerror();
+					}
+				}
+			}
+			counter++;
+		}
+
+		// Delete enemy if hit by weakness
+		counter = 0;
+		for (iter2 = enemyArray.begin(); iter2 != enemyArray.end(); iter2++){
+			if (enemyArray[counter].removeEnemy == true) {
+				enemyArray.erase(iter2);
+				break;
+			}
+			counter++;
+		}
+
+		// Countdown begins if Player gets scared
+		if (MainPlayer.playerPause) {
+			Clock clock;
+			Time timer = clock.getElapsedTime();
+			if (timer.asSeconds() <= 0) {
+				PlayerStunCountdown--;
+				clock.restart();
+			}
+		}
+		if (PlayerStunCountdown <= 0) {
+			MainPlayer.playerPause = false;
+			PlayerStunCountdown = 6;
+		}
+
 		// Output the characters position on console - to be deleted
 		std::cout << "(Player: " << MainPlayer.rect.getPosition().x << "," << MainPlayer.rect.getPosition().y << ")" <<
-			"Direction: " << MainPlayer.direction << " Status : " << MainPlayer.playerStatus << std::endl;
+			"Direction: " << MainPlayer.direction << " Status : " << MainPlayer.playerStatus << "Player Pause: " << MainPlayer.playerPause << std::endl;
 
 		Window.draw(MainPlayer.sprite);
 		MainPlayer.update();
-		MainPlayer.playerMovement();
+
+		if(!MainPlayer.playerPause && !MainPlayer.playerDead) {
+			MainPlayer.playerMovement();
+		}
 		Window.display();
 	}
 }
